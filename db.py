@@ -8,11 +8,10 @@ def init_db():
         CREATE TABLE IF NOT EXISTS pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT,
-            temperatura REAL,
-            freq_cardiaca INTEGER,
-            pressao TEXT,
-            freq_respiratoria INTEGER,
-            oxigenacao REAL,
+            idade INTEGER,
+            peso REAL,
+            altura REAL,
+            imc REAL,
             risco TEXT
         )
     """)
@@ -22,8 +21,8 @@ def init_db():
 def salvar_paciente(conn, dados):
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO pacientes (nome, temperatura, freq_cardiaca, pressao, freq_respiratoria, oxigenacao, risco)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO pacientes (nome, idade, peso, altura, imc, risco)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, dados)
     conn.commit()
 
