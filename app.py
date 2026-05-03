@@ -2,66 +2,72 @@ import streamlit as st
 from db import init_db, salvar_paciente, listar_pacientes
 from utils import classificar_risco, formatar_imc
 
-# 1. Configuração da página (Deve ser sempre o primeiro comando Streamlit)
-st.set_page_config(page_title="Triagem Clínica Estética", page_icon="⚖️")
-st.title("⚖️ Triagem de Risco Metabólico - Clínica Estética")
+st.set_page_config(page_title="Triagem Clínica", page_icon="🩺", layout="wide")
 
-# Inicializa conexão com banco
+# CSS para métricas e espaçamento
+st.markdown("""
+    <style>
+    [data-testid="stMetricValue"] { font-size: 1.8rem; color: #1e3a8a; }
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🩺 Triagem de Risco Metabólico")
 conn = init_db()
 
-# 2. Entrada de dados
-st.header("Cadastro de Paciente")
-with st.form("cadastro_paciente"):
-    nome = st.text_input("Nome completo")
-    idade = st.number_input("Idade", min_value=0, max_value=120, step=1)
+tab_fila, tab_cadastro = st.tabs(["📋 Fila de Chamada", "➕ Novo Paciente"])
+
+with tab_cadastro:
+    st.subheader("Dados do Paciente")
+    with st.form("form_clinica", clear_on_submit=True):
+        nome = st.text_input("Nome completo")
+        idade = st.number_input("Idade", min_value=0, value=30)
+        c1, c2 = st.columns(2)
+        with c1: peso = st.number_input("Peso (kg)", min_value=1.0, step=0.1, value=70.0)
+        with c2: altura = st.number_input("Altura (m)", min_value=0.5, step=0.01, value=1.70)
+        
+        if st.form_submit_button("Finalizar Triagem", use_container_width=True):
+            if nome:
+                status, nivel, classe = classificar_risco(peso, altura, idade)
+                salvar_paciente(conn, (nome, idade, peso, altura, formatar_imc(peso, altura), status, nivel, classe))
+                st.toast(f"✅ {nome} na fila!", icon='🩺')
+                st.rerun()
+
+with tab_fila:
+    df = listar_pacientes(conn)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        peso = st.number_input("Peso (kg)", min_value=10.0, max_value=300.0, step=0.1)
-    with col2:
-        altura = st.number_input("Altura (m)", min_value=0.5, max_value=2.5, step=0.01)
+    if not df.empty:
+        # 1. CRIAÇÃO DA POSIÇÃO MINIMALISTA
+        # Extrai o emoji do risco para colocar ao lado do número
+        df_display = df.reset_index(drop=True)
+        df_display['Emoji'] = df_display['risco'].str[0] # Pega o 🔴, 🟡 ou 🟢
+        df_display['Posição'] = (df_display.index + 1).astype(str) + "º " + df_display['Emoji']
 
-    submit = st.form_submit_button("Realizar Triagem")
+        # 2. MONITOR DE CHAMADA (VISÃO LIMPA)
+        st.subheader("📢 Monitor de Chamada")
+        monitor_df = df_display[['Posição', 'nome', 'classificacao', 'risco']].copy()
+        
+        # Exibe a tabela sem fundos coloridos agressivos
+        st.dataframe(
+            monitor_df.drop(columns=['Emoji'], errors='ignore'),
+            use_container_width=True, 
+            hide_index=True
+        )
 
-    if submit:
-        if nome and altura > 0:
-            imc_atual = formatar_imc(peso, altura)
-            risco = classificar_risco(peso, altura, idade)
-            
-            # Salva no banco de dados
-            salvar_paciente(conn, (nome, idade, peso, altura, imc_atual, risco))
-            
-            # Alerta visual imediato
-            if "VERMELHA" in risco:
-                st.error(f"🚨 Paciente: {nome} | IMC: {imc_atual} | STATUS: {risco}")
-            elif "AMARELO" in risco:
-                st.warning(f"⚠️ Paciente: {nome} | IMC: {imc_atual} | STATUS: {risco}")
-            else:
-                st.success(f"✅ Paciente: {nome} | IMC: {imc_atual} | STATUS: {risco}")
-        else:
-            st.error("Por favor, preencha todos os campos corretamente.")
-
-# 3. Consulta e Exibição
-st.header("Fila de Atendimento")
-df = listar_pacientes(conn)
-
-if not df.empty:
-    # Correção do erro: .applymap mudou para .map nas versões recentes do Pandas
-    # Também usei use_container_width para a tabela ocupar a tela toda
-    st.dataframe(
-        df.style.map(
-            lambda x: 'background-color: #ffcccc' if 'VERMELHA' in str(x) else 
-                      'background-color: #ffffcc' if 'AMARELO' in str(x) else 
-                      'background-color: #ccffcc' if 'VERDE' in str(x) else '',
-            subset=['risco']
-        ),
-        use_container_width=True
-    )
-    
-    # 4. Estatísticas
-    st.subheader("📊 Perfil de Risco da Clínica")
-    # Gráfico de barras simples com a contagem de cada risco
-    contagem_risco = df["risco"].value_counts()
-    st.bar_chart(contagem_risco)
-else:
-    st.info("Nenhum paciente registrado no momento.")
+        # 3. DETALHAMENTO TÉCNICO
+        st.write("")
+        with st.expander("🔍 Detalhamento Técnico"):
+            tecnico_df = df_display[['Posição', 'nome', 'idade', 'peso', 'altura', 'imc']]
+            st.dataframe(
+                tecnico_df.style.format({'peso': '{:.1f} kg', 'altura': '{:.2f} m', 'imc': '{:.2f}'}),
+                use_container_width=True, 
+                hide_index=True
+            )
+        
+        # MÉTRICAS
+        st.divider()
+        m1, m2 = st.columns(2)
+        m1.metric("Total na Fila", len(df))
+        m2.metric("Prioridades", len(df[df['risco'].str.contains('🔴')]))
+    else:
+        st.info("Fila vazia.")

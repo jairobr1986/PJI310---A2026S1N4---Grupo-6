@@ -1,32 +1,32 @@
-🏥 Sistema de Triagem Hospitalar (Mostruário)
-Este projeto é um protótipo acadêmico desenvolvido em Python + Streamlit, que simula um sistema de triagem hospitalar baseado em sinais vitais dos pacientes.
-O objetivo é demonstrar como tecnologias simples podem apoiar a sociedade em situações de doenças contagiosas, pandemias, endemias, epidemias e catástrofes, ajudando na classificação de risco e priorização de atendimentos.
+# 🩺 Triagem de Risco Metabólico
 
-📌 Funcionalidades
-Cadastro de pacientes com dados vitais:
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 
-Temperatura corporal
+Sistema inteligente de triagem clínica focado em **UX Minimalista** e **Gestão de Fila por Prioridade**. Desenvolvido para automatizar o cálculo de IMC e organizar o atendimento com base no risco metabólico e idade.
 
-Frequência cardíaca
+---
 
-Pressão arterial
+## 📸 Interface do Sistema
 
-Frequência respiratória
+> **Dica:** Adicione aqui um print da sua tela "Monitor de Chamada". Você pode salvar a imagem na pasta do projeto e linkar assim:
+> `![Monitor de Chamada](assets\img\monitor_chamada.png)`
+> `![Cadastro de pacientes](assets\img\assets\img\novo_paciente.png)`
 
-Oxigenação
+---
 
-Classificação automática de risco (inspirada no Protocolo Manchester):
+## 📋 Funcionalidades Principais
 
-🔴 Vermelho – Emergência
+*   **Fila Inteligente**: Ordenação automática (Idosos + Obesidade Crítica primeiro).
+*   **Monitor Minimalista**: Visual limpo com indicadores discretos (🔴, 🟡, 🟢) para evitar fadiga visual.
+*   **Detalhamento Técnico**: Seção expansível para profissionais de saúde consultarem dados biométricos.
+*   **Cálculo Automático**: Classificação instantânea de Obesidade Grau I, II e III.
 
-🟡 Amarelo – Urgente
+## 🛠️ Estrutura do Projeto
 
-🟢 Verde – Pouco Urgente
-
-🔵 Azul – Não Urgente
-
-Armazenamento local em SQLite (sem necessidade de internet).
-
-Visualização de pacientes cadastrados em tabela interativa.
-
-Estatísticas rápidas de distribuição por nível de risco.
+```text
+├── app.py           # Interface Streamlit e Lógica de UI
+├── db.py            # Camada de Dados (SQLite + Pandas)
+├── utils.py         # Motor de Cálculo e Regras de Negócio
+└── README.md        # Documentação do Projeto

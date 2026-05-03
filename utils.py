@@ -1,23 +1,24 @@
 def classificar_risco(peso, altura, idade):
-    """
-    Classifica o risco metabólico com base no IMC e na Idade.
-    Critérios: Clínica de Estética e Obesidade.
-    """
-    # Cálculo do IMC
+    """Retorna: (Status Visual, Nível de Prioridade, Classificação de Peso)"""
     imc = peso / (altura ** 2)
     
-    # 🔴 ALTA PRIORIDADE: Obesidade Grau III ou Obesidade Severa em Idosos
-    if imc >= 40 or (imc >= 35 and idade >= 60):
-        return "VERMELHA: ALTA PRIORIDADE"
-    
-    # 🟡 PRIORIDADE MÉDIA: Obesidade Grau I e II
+    if imc >= 40:
+        status, nivel, desc = "🔴 Alta ++", (1 if idade > 60 else 2), "Obesidade Grau III (Mórbida)"
+    elif imc >= 35:
+        status, nivel, desc = "🔴 Alta", (3 if idade > 60 else 4), "Obesidade Grau II (Severa)"
     elif imc >= 30:
-        return "AMARELO: PRIORIDADE MEDIA"
-    
-    # 🟢 PRIORIDADE BAIXA: Sobrepeso ou Peso Normal
+        status, nivel, desc = "🔴 Alta", (3 if idade > 60 else 4), "Obesidade Grau I"
+    elif imc >= 25:
+        status, nivel, desc = "🟡 Média", 5, "Sobrepeso"
+    elif imc < 18.5:
+        status, nivel, desc = "🟡 Média", 5, "Abaixo do Peso"
     else:
-        return "VERDE: PRIORIDADE BAIXA"
+        status, nivel, desc = "🟢 Baixa", 6, "Peso Ideal"
+
+    if idade > 60 and imc >= 30: 
+        status += " (Idoso)"
+        
+    return status, nivel, desc
 
 def formatar_imc(peso, altura):
-    """Retorna o IMC arredondado para duas casas decimais."""
     return round(peso / (altura ** 2), 2)
