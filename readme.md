@@ -16,6 +16,9 @@ Sistema inteligente de triagem clínica focado em **UX Minimalista** e **Gestão
   <br>
   <p><b>Fluxo de Cadastro</b></p>
   <img src="assets/img/novo_paciente.png" alt="Cadastro de pacientes" width="800px">
+  <br>
+  <p><b>Detalhamento Tecnico</b></p>
+  <img src="assets/img/detalhamento_tecnico.png" alt="Cadastro de pacientes" width="800px">
 </div>
 
 ---
